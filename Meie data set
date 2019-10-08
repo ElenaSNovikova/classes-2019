@@ -33,3 +33,6 @@ ggplot(data = meie) +
 
 ggplot(data = meie) +
   geom_bar(aes(x = year, fill = local), position = "dodge")
+
+ggplot(data = meie) +
+  geom_bar(aes(x = year, fill = foreign_collaboration), position = "dodge")
