@@ -35,7 +35,10 @@ ggplot(data = meie) +
   geom_smooth(aes(x = IF, y = cites))+
   facet_wrap(~foreign_collaboration) 
   
-
+ggplot(data = meie) +
+  geom_smooth(aes(x = IF, y = cites), method = "lm")+
+  facet_wrap(~foreign_collaboration) 
+  
 ggplot(data = meie) +
   geom_bar(aes(x = year, fill = local), position = "dodge")
 
