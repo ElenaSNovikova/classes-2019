@@ -43,3 +43,5 @@ ggplot(data = meie) +
   geom_point(aes(x = IF, y = cites, color = local))+
   facet_wrap(~foreign_collaboration)
 
+ggplot(data = meie) +
+  geom_bar(aes(x = year, fill = local), position = "dodge")
