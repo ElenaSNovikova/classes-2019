@@ -193,7 +193,7 @@ ggplot(data = mpg) +
   scale_shape_manual(values = 1:7)
 ```
 
-Is everything OK with shapes?
+Is everything OK with shapes? As ther are only 6 shapes initially
 
 3. Using **dplyr** built-in **starwars** dataset (hint: starwars) make height~mass scatterplot and map one continuous variable to size:
 
@@ -207,7 +207,23 @@ Make height~mass scatterplot and map one continuous variable to size:
 ggplot(data = starwars) +
   geom_point(mapping = aes(x = height, y = mass, size = birth_year))
 ```
+Use log function natural log or log10
 
+```{r}
+ggplot(data = starwars) +
+  geom_point(mapping = aes(x = height, y = log(mass), size = birth_year))
+```
+
+```{r}
+ggplot(data = starwars) +
+  geom_point(mapping = aes(x = height, y = log10(mass), size = birth_year))
+```
+
+```{r}
+ggplot(data = starwars) +
+  geom_point(mapping = aes(x = height, y = mass, size = birth_year))+
+scale_y_log10()
+```
 
 Extra: there is apparent outlier. Try using geom_label to add name to this point:
 
@@ -291,6 +307,9 @@ ggplot(data = mpg) +
 
 2. Which variables in mpg are categorical? Which variables are continuous? (type ?mpg to read the documentation for the dataset). How can you see when you run mpg?
 ```{r}
-
+mpg
 ```
 
+```{r}
+?mpg
+```
