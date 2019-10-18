@@ -37,7 +37,19 @@ Most of readr's functions are concerned with turning flat files into data frames
 The first argument to read_csv() is the most important: it's the path to the file to read.
 
 ```{r}
-(index <- read_csv(file = "data/consumer_index.csv"))
+(index <- read_csv(file = "data/viruses.csv"))
+```
+
+
+```{r}
+(index <- read_csv(file = "data/viruses.csv", col_types=cols(release_date="c")))
+```
+
+back to column types
+
+
+```{r}
+(index <- read_csv(file = "data/viruses.csv"))
 ```
 
 When you run read_csv() it prints out a column specification that gives the name and type of each column. That's an important part of readr: http://r4ds.had.co.nz/data-import.html#parsing-a-file
@@ -52,6 +64,15 @@ read_csv("a,b,c
 Note that string used in the previous example is spread into three lines. You can insert line end/newline explicitly by using "\n" string (no need to leave spaces!): 
 ```{r}
 read_csv("a,b,c\n4,5,6\n1,2,3")
+```
+
+
+```{r}
+read_csv("a,b\n4,2-3-2017")
+```
+can modify 1 column
+```{r}
+read_csv("a,b\n4,2-13-2017",col_types=cols(b=col_date(format="%m-%d-%Y")))
 ```
 
 ### Skip rows and column names options
@@ -77,15 +98,38 @@ read_csv("# A comment I want to skip
   x,y,z
   1,2,3", comment = "#")
 ```
+comment will be skiped automatically
 
 Real-life example:
+
 ```{r}
-(rba <- read_csv("data/ECIS_141022_MFT_2_RbA.csv"))
+my_date_format <- col_date(format = "%d.%m.%Y")
+(pac <- read_csv2("hf-data/post-acute_care_data_only (rows).csv",
+                  na="n/a"))
+```
+
+
+```{r}
+my_date_format <- col_date(format = "%d.%m.%Y")
+(pac <- read_delim("hf-data/post-acute_care_data_only (rows).csv",
+                  na="n/a",
+                  col_types=cols(invoice_start=my_date_format,
+                                 invoice_end=my_date_format)))
+```
+numbers will be conducted to characters. if n/a
+
+
+```{r}
+my_date_format <- col_date(format = "%d.%m.%Y")
+(pac <- read_csv2("hf-data/post-acute_care_data_only (rows).csv",
+                  na="n/a",
+                  col_types=cols(invoice_start=my_date_format,
+                                 invoice_end=my_date_format)))
 ```
 
 So what's the problem?
 ```{r}
-problems(rba)
+problems(pac)
 ```
 
 This real-life example bring us to the another common issue with csv tables:
@@ -93,6 +137,11 @@ This real-life example bring us to the another common issue with csv tables:
 2. __The data might not have column names__ You can use col_names = FALSE to tell read_csv() not to treat the first row as headings, and instead label them sequentially from X1 to Xn:
 
 In this example, we have only values, with no apparent column names. Note that base R does not allow numeric column names! In base R, read.csv prepends numerics with X and converts to string. read.csv does not allow string input or data, input must be file path.
+
+```{r}
+read_csv("1,2,3\n4,5,6")
+```
+
 ```{r}
 read_csv("1,2,3\n4,5,6", col_names = FALSE)
 ```
@@ -184,13 +233,24 @@ While read_excel() auto detects the format from the file extension, read_xls() a
 
 Let's have a look at the sheets:
 ```{r}
-(sheets <- excel_sheets("data/ECIS_141022_MFT_1.xls"))
+(sheets <- excel_sheets("hf-data/post-acute_care_data_only (rows).xlsx"))
 ```
 
 You need to import one sheet at the time:
 ```{r}
-(z_500 <- read_excel("data/ECIS_141022_MFT_1.xls", sheet = "Z 500 Hz"))
+(z_500 <- read_excel("hf-data/post-acute_care_data_only (rows).xlsx", sheet = "post-acute_care"))
 ```
+Problem with dates
+
+```{r}
+library(lubridate)
+start<- ymd("1900-01-01")
+start + 39826
+```
+
+
+
+
 
 ```{r, eval = FALSE}
 (z <- read_excel("data/ECIS_141022_MFT_1.xls", sheet = 3:5))
@@ -203,6 +263,8 @@ mft <- map(sheets[3:5], ~ read_excel("data/ECIS_141022_MFT_1.xls", sheet = .x))
 names(mft) <- sheets[3:5]
 bind_rows(mft, .id = "Param")
 ```
+can asign the name to a sheet. can also do for 1 sheet
+
 
 ## Tidy data
 
