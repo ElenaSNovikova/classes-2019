@@ -39,7 +39,7 @@ library(here)
 ```
 
 
-Using mpg dataset, we **plot each class of cars on a separate subplot** and we arrange plots into 2 rows:
+Using mpg dataset, we **plot each class of cars on a separate subplot** and we arrange plots into 2 rows: class to split the data set to change order need to change data set
 ```{r}
 ggplot(data = mpg) +
   geom_point(mapping = aes(x = displ, y = hwy)) +
@@ -49,7 +49,9 @@ ggplot(data = mpg) +
 
 To plot combination of two variables drv and cyl, we use facet_grid():
 ```{r}
-
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(c("drv","cyl"))
 ```
 
 
@@ -59,16 +61,50 @@ To plot combination of two variables drv and cyl, we use facet_grid():
 
 If you want to omit rows or columns in facet_grid() use `. ~ var` or `var ~ .`, respectively.
 ```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv~cyl)
+```
 
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(.~cyl)
+```
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(cyl~.)
 ```
 
 We can have separate y or x axis axis limits for row or column variables, respectively, by setting scales argument to "free_y" or "free_x".
 
 free_y:
-```{r}
 
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv~cyl)
+```
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv~cyl, scales = "free_y")
 ```
 
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv~cyl, scales = "free_x")
+```
+
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv~cyl, scales = "free")
+```
 free_x:
 ```{r}
 
@@ -81,9 +117,12 @@ We can also set both axes to "free":
 ```
 
 
-Scales argument works also with facet_rap():
-```{r}
+Scales argument works also with facet_wrap():
 
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~cyl, scales = "free")
 ```
 
 
@@ -99,8 +138,16 @@ mpg
 
 Make hwy versus displ scatterplot where facets are mapped to continuous variable:
 ```{r}
-
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cty, y = hwy)) +
+  facet_wrap(~displ)
 ```
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cty, y = hwy)) +
+  facet_wrap(~displ<4)
+```
+
 Each raw value is converted to categorical value and gets its own facet?
 
 
@@ -164,7 +211,8 @@ However, note that __not every aesthetic works with every geom.__
 We can tweak the above plot by mapping each type of drive (drv) to different linetype.
 
 ```{r}
-
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype=drv))
 ```
 
 Plot legend, "4" stands for four-wheel drive, "f" for front-wheel drive, "r" for rear-wheel drive. 
@@ -201,19 +249,27 @@ ggplot(data = mpg) +
   geom_smooth(mapping = aes(x = displ, y = hwy, color = drv))
 ```
 
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, color = drv),show.legend=FALSE)
+```
 ### Multiple geoms
 
 To display multiple geoms in the same plot, add multiple geom functions to ggplot(), each geom can have her own aesthetic:
 
 ```{r}
-
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))+
+  geom_smooth(mapping = aes(x = displ, y = hwy))
 ```
 
 
 Probably you notice, that if we go with aethetic mappings as we used to, by specifing them within geom function, we introduce some code duplication. This can be easily avoided by moving aes() part from geom_ to the ggplot():
 
 ```{r}
-
+ggplot(data = mpg,mapping = aes(x = displ, y = hwy)) +
+  geom_point()+
+  geom_smooth()
 ```
 
 Now, ggplot2 uses this mapping globally in all geoms.
@@ -221,16 +277,28 @@ Now, ggplot2 uses this mapping globally in all geoms.
 > If you place mappings in a geom function, ggplot2 will treat them as local mappings for the layer. It will use these mappings to extend or overwrite the global mappings for that layer only. This way it's possible to use different aesthetics in different layers (for example, if you wish to plot model fit over data points).
 
 Here, we create displ~hwy scatterplot with loess smooth line fitted trough all point, additionally we map color to the class of cars (whereas geom_smooth still plots only one line):
-```{r}
 
+```{r}
+ggplot(data = mpg,mapping = aes(x = displ, y = hwy)) +
+  geom_point(aes(color=class))+
+  geom_smooth()
 ```
 
 
 **Importantly, you can use the same idea to specify different data for each layer**, let's plot only loess smooth for subcompact class of cars: 
 ```{r}
-
+ggplot(data = mpg,mapping = aes(x = displ, y = hwy)) +
+  geom_point(aes(color=class))+
+  geom_smooth(data = filter(mpg, class=="subcompact"))
 ```
 
+
+```{r}
+subcompacts<- filter(mpg, class=="subcompact")
+ggplot(data = mpg,mapping = aes(x = displ, y = hwy)) +
+  geom_point(aes(color=class))+
+  geom_smooth()
+```
 
 Above, our smooth line displays just a subset of the mpg dataset, the subcompact cars. The local data argument in geom_smooth() overrides the global data argument in ggplot() for that layer only.
 
@@ -322,8 +390,15 @@ diamonds_summarised
 
 Here we (re)create diamond counts plot using summary data. Note that here we need to use also y-aesthetic!
 ```{r}
-ggplot(data = diamonds_summarised)
+ggplot(data = diamonds_summarised)+
+  geom_bar(aes(x=cut, y=n), stat="identity")
 ```
+
+```{r}
+ggplot(data = diamonds_summarised)+
+  geom_col(aes(x=cut, y=n))
+```
+
 
 2. You might want to override the default mapping from transformed variables to aesthetics. For example, you might want to display a bar chart of proportion, rather than count:
 
@@ -332,7 +407,8 @@ To get proportions onto y axis we can use prop function or count function, note 
 We also need to set "group = 1" to get relative proportions of categories in our dataset.
 
 ```{r}
-
+ggplot(data = diamonds_summarised)+
+  stat_count(mapping=aes(cut, y=..prop.., group = 1))
 ```
 
 To find the variables computed by the stat, look for the help section titled "computed variables".
@@ -350,17 +426,37 @@ ggplot(data = diamonds) +
   )
 ```
 
-Mean and SE:
+Mean and SE: more that 1 data pont
 ```{r}
 ggplot(data = diamonds) + 
   stat_summary(
     mapping = aes(x = cut, y = depth),
-    fun.data = mean_se
+    fun.data = mean_se,
+      size=0.1
   )
 ```
 
 If you want to use mean +/- SD like this, you need mean_sdl() function from Hmisc package (meaning, that you need to install Hmisc).
+```{r}
+library(Hmisc)
+```
 
+```{r}
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.data = mean_sdl, fun.args = list(mult=1)
+  )
+```
+Mean and arrowbar
+
+```{r}
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+geom="arrorbar"+
+stat_summary(mapping = aes(x = cut, y = depth),fun.y = mean, geom="point")
+```
 
 ## Position adjustments - how to get bars side-by-side
 
@@ -416,16 +512,25 @@ To learn more about a position adjustment, look up the help page associated with
 
 ### Exercises
 
-1. What is the problem with this plot? How could you improve it?
+1. What is the problem with this plot? How could you improve it? 
 ```{r}
 ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
-  geom_point()
+  geom_point(position= "jitter")
 ```
 
 2. What parameters to geom_jitter() control the amount of jittering?
 
 3. What’s the default position adjustment for geom_boxplot()? Create a visualisation of the mpg dataset that demonstrates it.
 
+
+dodge2 for geom_bar
+preserve single
+
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot()
+```
 
 ## Coordinate systems
 
@@ -444,7 +549,11 @@ ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
 
 Without flipping, long x-axis labels can be a mess! 
 
-
+```{r}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot()+
+  coord_flip()
+```
 ### Maps
 
 - coord_quickmap() sets the aspect ratio correctly for maps. This is very important if you’re plotting spatial data with ggplot2.
@@ -474,7 +583,10 @@ ggplot(est, aes(long, lat, group = group)) +
 
 ### Excercises
 
-1. What does labs() do? Read the documentation.
+1. What does labs() do? Read the documentation. add different labels
+
+caption 
+
 
 2. What’s the difference between coord_quickmap() and coord_map()?
 
