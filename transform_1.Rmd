@@ -368,6 +368,12 @@ If you provide more than one column name, each additional column will be used to
 arrange(viruses, size_kb)
 ```
 
+
+
+```{r}
+arrange(summary, acute_LOS)
+```
+
 Use desc() to re-order by a column in descending order. You can combine variables:
 ```{r}
 arrange(viruses, organism_name, desc(size_kb))
@@ -378,6 +384,9 @@ Missing values are always sorted at the end, even with desc() function:
 df <- tibble(x = c(5, NA, 2))
 arrange(df, x)
 ```
+pac %<% filter(pac, complete.cases(.))
+use pipe
+keep only complete cases
 
 ```{r}
 arrange(df, desc(x))
@@ -385,6 +394,31 @@ arrange(df, desc(x))
 
 
 ### Get unique rows with distinct()
+
+in base R function unique()
+
+```{r}
+x<-c(1,1,1,1,4,4,5)
+unique(x)
+```
+
+before pac is from output???
+```{r}
+unique(pac$post_acute_trherapy)
+```
+
+what different categories and hw many?
+
+
+```{r}
+lenght(unique(pac$post_acute_trherapy))
+```
+to keep only unique rows
+```{r}
+distinct(summary, year, fracture_type)
+```
+
+
 
 Sometimes observations become duplicated during data wrangling, sometimes you need to get unique combinations of observations. 
 dplyr has distinct() function to retain only unique rows from input table.
@@ -435,7 +469,7 @@ arrange(viruses, desc(gc))
 
 select() allows you to rapidly zoom in on a useful subset of columns using operations based on the names of the variables.
 
-Select first three columns:
+Select first three columns: alwaya works on columns
 ```{r}
 select(viruses, 1:3)
 ```
@@ -467,6 +501,11 @@ vars_out <- c("bioproject_accession", "bioproject_id", "segments")
 select(viruses, -vars_out)
 ```
 
+```{r}
+vars_out <- c("bioproject_accession", "bioproject_id", "segments")
+select(viruses, vars_out)
+```
+
 This expression will fail, because we don't have objects called bioproject_accession etc in our R environment!
 ```{r, eval=FALSE}
 vars_out <- c(bioproject_accession, bioproject_id, segments)
@@ -487,13 +526,23 @@ Select columns that start with "bio"
 select(viruses, starts_with("bio"))
 ```
 
+```{r}
+select(summary_csv,starts_with("acute"))
+```
 
-- ends_with("xyz"): matches names that end with "xyz".
+!!! Only uses exact expressions
+
+-ends_with("xyz"): matches names that end with "xyz".
 
 
 Select columns that end with "date"
 ```{r}
 select(viruses, ends_with("date"))
+```
+
+
+```{r}
+select(summary_csv,ends_with("LOS"))
 ```
 
 
@@ -503,6 +552,11 @@ All columns that contain word "project"
 ```{r}
 select(viruses, contains("project"))
 ```
+
+```{r}
+select(summary_csv,contains("date"))
+```
+
 
 
 - matches("(.)\\1"): selects variables that match a regular expression. 
@@ -520,8 +574,32 @@ Select columns/variables with punctuation marks:
 select(viruses, matches("[[:punct:]]"))
 ```
 
+at least one number
+```{r}
+select(summary_csv, matches("[0-9]"))
+```
+2 numbers
+```{r}
+select(summary_csv, matches("[0-9]{2}"))
+```
+
+1 or 2 numbers
+```{r}
+select(summary_csv, matches("[0-9]{1,2}"))
+```
+
 
 - num_range("V", 1:10000) matches V1, V2 and V3.
+
+
+```{r}
+read_csv("1,2,3\n", col_names=FALSE)
+```
+
+```{r}
+x <- read_csv("a,,\n1,2,3")
+select(x,num_ange("x", 2:3))
+```
 
 
 - everything() is useful if you have a handful of variables you'd like to move to the start of the data frame.
@@ -533,6 +611,7 @@ You can rearrange the order of columns.
 select(viruses, tax_id, size_kb, gc, everything())
 ```
 
+everything select every column in the given order
 
 See ?select for more details.
 
@@ -564,8 +643,17 @@ select(viruses, c("tax_id", "gc", "fffffff"))
 
 Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default?
 
+!!!Ignored the case by default
+
 ```{r}
 ?select
 select(viruses, contains("GC", ignore.case = TRUE))
 ```
 
+
+
+
+```{r}
+?select
+select(viruses, contains("GC", ignore.case = FALSEremaind))
+```
